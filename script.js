@@ -63,9 +63,13 @@ const inputClosePin = document.querySelector(".form__input--pin");
 
 /////////////////////////////////////////////////
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
     containerMovements.innerHTML = "";
-    movements.forEach(function (mov, i) {
+
+    // slice method to take copy and then sort
+    const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+    movs.forEach(function (mov, i) {
         const type = mov > 0 ? "deposit" : "withdrawal";
         const html = `
       <div class="movements__row">
@@ -171,5 +175,41 @@ btnTransfer.addEventListener("click", function (e) {
     }
 });
 
-// inputTransferTo
-//  inputTransferAmount
+btnClose.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (
+        currentAccount.username === inputCloseUsername.value &&
+        currentAccount.pin === Number(inputClosePin.value)
+    ) {
+        const index = accounts.findIndex(
+            (acc) => acc.username === currentAccount.username
+        );
+        accounts.splice(index, 1);
+        containerApp.style.opacity = "0";
+    }
+    inputCloseUsername.value = inputClosePin.value = "";
+});
+
+btnLoan.addEventListener("click", function (e) {
+    e.preventDefault();
+    const amount = Number(inputLoanAmount.value);
+    if (amount > 0 && currentAccount.movements.some((mov) => mov > 0)) {
+        currentAccount.movements.push(amount);
+        userUi(currentAccount);
+    }
+    inputLoanAmount.value = "";
+});
+
+// sort
+// it works but i will use another way
+// const sortFun = function () {
+//     currentAccount.movements.sort((a, b) => a - b);
+//     userUi(currentAccount);
+// };
+// btnSort.addEventListener("click", sortFun);
+let sorted = false;
+btnSort.addEventListener("click", function (e) {
+    e.preventDefault();
+    displayMovements(currentAccount.movements, !sorted);
+    sorted = !sorted;
+});
